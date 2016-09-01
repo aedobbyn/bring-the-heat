@@ -9,31 +9,9 @@
 # scale point_elapsed_seconds and elapsed_time
 
 
-# plot each player's actions (averaged)
-# colour = their name, size = number of Ds
-# facets = action
-# maybe set a threshold (at least 4 Ds or something)
-
-
-plus_minus_dropAnonymous <- plus_minus %>%
-  filter(
-    name != 'Anonymous'
-  )
-p_m_plot <- ggplot(data = plus_minus_dropAnonymous, aes(x = Ds, y = goals, colour = name)) 
-p_m_plot + geom_point()
-
-
-plus_minus_by_game <- plus_minus %>%
-  group_by(ind.gme)
-
-
-
-
 # the schedule, graphically
 plot_by_game <- ggplot(bh_all, aes(opponent, ind.game))
 plot_by_game + geom_point()
-
-
 
 
 # just take first game
@@ -47,37 +25,11 @@ tseries.game1 <- ggplot(bh_game1, aes(elapsed_time, action))
 tseries.game1 + geom_point()
 
 
-
-# for time series, probably will have to
-# a) standardize things
-# b) bin time into intervals like 5 mins or 1 point
-
-# tseries.game1 <- ggplot(bh_game1, aes(elapsed_time, count),
-#                         fill=action)
-# tseries.game1 + geom_histogram()
-
-
-# getting cumsums just for game 1
+# get cumulative sums just for game 1
 bh_all_cumsums_g1 <- bh_all_cumsums %>%
   filter(
     ind.gme == '1'
     ) 
-
-# 
-tseries.g1.acts <- ggplot(data = bh_all_cumsums_g1, aes(x = elapsed_time)) +
-  geom_line(aes(y = cum.goal, colour='green')) +
-  geom_line(aes(y = cum.block, colour = 'blue')) +
-  geom_line(aes(y = cum.throwaway, colour = 'red')) +
-  geom_line(aes(y = cum.drop, colour = 'orange')) +
-  xlab('Elapsed Time') +
-  ylab('Cumulative number of actions') + 
-  title('Actions over first game')
-tseries.g1.acts
-
-
-
-
-
 
 
 # limit to games played against the Radicals
@@ -116,7 +68,7 @@ rad_plot_exp + geom_point(aes(y = cum.block, colour = defender)) +
   geom_line(aes(y = cum.goal, colour = receiver)) 
 
 
-
+# plot each player's season blocks vs. their goals
 mvp <- bh_all_cumsums %>%
   ungroup() %>%
   group_by(receiver) %>%
@@ -131,16 +83,6 @@ mvp <- bh_all_cumsums %>%
 
 mvp_plot <- ggplot(data = mvp, aes(x = season.blocks, y = season.goals, colour = receiver))
 mvp_plot + geom_point()
-
-
-ggplot(df2, aes(x=cond1, y=yval)) + 
-  geom_line(aes(colour=cond2, group=cond2)) + # colour, group both depend on cond2
-  geom_point(aes(colour=cond2),               # colour depends on cond2
-             size=3)                          # larger points, different shape
-## Equivalent to above; but move "colour=cond2" into the global aes() mapping
-# ggplot(df2, aes(x=cond1, y=yval, colour=cond2)) + 
-#    geom_line(aes(group=cond2)) +
-#    geom_point(size=3)
 
 
 
