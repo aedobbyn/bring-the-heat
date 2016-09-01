@@ -230,14 +230,31 @@ bh_pt.diff <- bh_all %>%
 
 # linear model with opponent, elapsed_time, and their interaction predicting difference in 
 # our_score and their_score
-pt.diff.mod <- lm(pt_diff ~ opponent * elapsed_time, data = bh_pt.diff)
+pt.diff.mod.e_time <- lm(pt_diff ~ opponent * elapsed_time, data = bh_pt.diff)
 
 # take opponent out of the model
-pt.diff.no.opponent <- update(pt.diff.mod, . ~ . - opponent)
+pt.diff.e_time.no.opponent <- update(pt.diff.mod.e_time, . ~ . - opponent)
   
 library(lmtest)
 # test whether model with opponent (pt.diff.mod) is better at predicting point diff than model without
+lrtest(pt.diff.mod.e_time, pt.diff.e_time.no.opponent) # yes, opponent is a significant predictor of point diff
+
+
+
+
+
+
+# model with just opponent
+pt.diff.mod <- lm(pt_diff ~ opponent, data = bh_pt.diff)
+
+# take opponent out of the model
+pt.diff.no.opponent <- update(pt.diff.mod, . ~ . - opponent)
+
+library(lmtest)
+# test whether model with opponent (pt.diff.mod) is better at predicting point diff than model without
 lrtest(pt.diff.mod, pt.diff.no.opponent) # yes, opponent is a significant predictor of point diff
+
+
 
 
 
