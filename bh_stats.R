@@ -1,5 +1,7 @@
 # bh_stats.R
 
+# summary stats and models
+
 # ----- stats for Wildfire 2015 data ----------
 
 
@@ -187,6 +189,8 @@ bh_all_cumsums <- bh_all %>%
   ) 
 bh_all_cumsums
 tail(bh_all_cumsums)
+
+
 
 
 # scale elapsed time over game
