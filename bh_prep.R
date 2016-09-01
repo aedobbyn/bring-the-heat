@@ -297,9 +297,9 @@ bh$name <- factor(bh$name)
 
 
 
-# ------------ other ways to add game and ind.gme -------------
+# ------------ manually add game and ind.gme -------------
 
-# # hacking it manually until can come up with function that does this the right way
+# # hacking this manually until can come up with function that does this the right way
 # 
 # 
 # # get summary of the different opponent-date pairs (i.e., individual games)
