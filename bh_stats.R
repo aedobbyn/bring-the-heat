@@ -164,11 +164,6 @@ plus_minus_per_game <- bh %>%
 
 
 
-
-
-
-
-
 # add cumulative columns per individual game
 bh_all_cumsums <- bh_all %>%
   # select(action, opponent, ind.gme) %>%
