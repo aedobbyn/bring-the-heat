@@ -1,8 +1,14 @@
-# bring_the_heat
+# bring the heat
 
-Quick, very prelim analysis of Chicago Wildfire's 2015 season stats in R.
+Very preliminary analysis in R of Chicago's professional ultimate frisbee team's 2015 season stats.
 
-data in ChicagoWildfire2015-stats.csv,
-bh_prep.R cleans the data,
-bh_stats.R has some summary statistics,
-bh_plot.R makes a few plots in ggplot
+## Files
+* data in ChicagoWildfire2015-stats.csv
+* bh_prep.R cleans the data
+* bh_stats.R computes some summary statistics and a outlines a few simple models
+* bh_plot.R makes a few plots in ggplot2
+* Data from [Ultianalytics](http://www.ultianalytics.com/app/#/5671536392404992/players)
+
+
+## Other
+More info on the [Wildfire](http://theaudl.com/teams/wildfire)
