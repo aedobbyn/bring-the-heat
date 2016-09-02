@@ -4,8 +4,7 @@ bh_explore.R
 
 # Rproj information #
 #####################
-bring_heat.Rproj
-*.Rproj.user/10B715C4/sdb
+*.Rproj
 
 # pre-cleaned data # 
 ####################
