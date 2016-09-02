@@ -67,8 +67,7 @@ rad_plot_exp <- ggplot(data = rad_games, aes(x = elapsed_time)) + facet_grid(. ~
 rad_plot_exp + geom_point(aes(y = cum.block, colour = defender)) + 
   geom_line(aes(y = cum.goal, colour = receiver)) 
 
-
-# plot each player's season blocks vs. their goals
+# get measure of mvp as goals vs. blocks over the season
 mvp <- bh_all_cumsums %>%
   ungroup() %>%
   group_by(receiver) %>%
@@ -81,6 +80,7 @@ mvp <- bh_all_cumsums %>%
   )) %>%
   print(n = 50)
 
+# plot each player's season blocks vs. their goals
 mvp_plot <- ggplot(data = mvp, aes(x = season.blocks, y = season.goals, colour = receiver))
 mvp_plot + geom_point()
 
