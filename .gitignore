@@ -1,5 +1,16 @@
+# exploratory stuff #
+#####################
 bh_explore.R
 
+# Rproj information #
+#####################
 bring_heat.Rproj
+.Rproj.user/10B715C4/sdb
 
+# pre-cleaned data # 
+####################
 wildfire_stats.csv
+
+# OS generated files #
+######################
+.DS_Store
