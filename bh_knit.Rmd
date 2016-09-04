@@ -179,7 +179,7 @@ levels(bh$opponent) <- levels(bh$opponent) %>%
 levels(bh$opponent)
 ```
 
-```{r}
+```{r alleycats_levels}
 # we have two types of alleycats: Alleycats and AlleyCats. make them into one
 bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
 
