@@ -172,7 +172,6 @@ There are multiple columns for the same opponent
 # take vs in all its forms out of the opponents column
 levels(bh$opponent) <- levels(bh$opponent) %>%
                                  str_replace_all(c('vs ', 'vs. ', 'Vs. '), '')
-<<<<<<< HEAD
 
 # check that our levels of opponent look right
 levels(bh$opponent)
@@ -180,7 +179,6 @@ levels(bh$opponent)
 # we have two types of alleycats: Alleycats and AlleyCats. make them into one
 bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
  
-=======
 ```
 
 ```{r checklevels_of_opponent}
@@ -192,7 +190,6 @@ levels(bh$opponent)
 # we have two types of alleycats: Alleycats and AlleyCats. make them into one
 bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
 
->>>>>>> experiment
 # drop the unused level
 bh <- bh %>%
   droplevels()
