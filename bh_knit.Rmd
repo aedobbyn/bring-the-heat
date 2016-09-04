@@ -1,0 +1,324 @@
+---
+title: "Bring the Heat"
+author:
+  name: Amanda Dobbyn
+  email: aedobbyn@uchicago.edu
+output: html_document
+---
+
+***
+
+Outline
+=====
+* About:
+    + Info on the [Wildfire](http://theaudl.com/teams/wildfire)
+    + Data from [UltiAnalytics](http://www.ultianalytics.com/app/#/5671536392404992/players)
+    + More extensive code in `bh_prep.R`, `bh_stats.R`, and `bh_plot.R`
+* Pre-process:
+    + Standardize names and dates
+    + Get data in tidy format
+* Analyze:
+    + Calculate each player's plus-minus
+* Plot:
+    + Plot season blocks vs. season goals to determine Wildfire MVP
+
+***
+
+## Munge
+
+__Import packages__  
+using `pacman`
+
+```{r import_pacman, echo=TRUE, warning=FALSE, message=FALSE}
+library(pacman)
+```
+
+
+```{r load_packages}
+p_load(RPostgreSQL,
+       tibble,
+       lubridate,
+       tidyr,
+       dplyr,
+       stringr,
+       readr,
+       data.table,
+       ggplot2,
+       ggrepel)
+```
+
+```{r set_wd, echo=FALSE}
+# ------- set wd ---------
+
+setwd("/Users/amanda/Desktop/post_exCog/bring_heat")
+```
+
+***
+
+__Import data__  
+using `readr`
+
+```{r import_dat, message=FALSE, warning=FALSE}
+bring_heat_2 <- read_csv('./ChicagoWildfire2015-stats.csv')
+```
+
+Make the data into a [tibble](https://github.com/hadley/tibble)
+```{r make_tibble}
+bh <- as_tibble(bring_heat_2)
+```
+
+Take a look at what we have
+```{r}
+bh
+```
+^ yikes
+
+<br /> <br /> <br />
+
+**Manipulate variable names**  
+Check out column names
+```{r get_names}
+names(bh)
+```
+
+Get rid of players 8 through 27 because they will never exist  
+(There are only ever 7 players per team on the field at once)
+
+```{r remove_phantom_players}
+bh <- bh %>%
+  select(
+    -(`Player 8`:`Player 27`)
+  )
+```
+
+Replace all spaces in column names with underscores
+```{r space_to_underscore}
+names(bh) <- str_replace_all(names(bh), " ", "_")
+```
+
+Take out "- End of Point" from `Their Score - End of Point` and `Our Score - End of Point`
+```{r remove_end_of_point_garbage}
+names(bh) <- str_replace_all(names(bh), '_-_End_of_Point', '')
+```
+
+Take out the seconds unit at the end of hang time and elapsed time
+```{r}
+names(bh) <- gsub('_(secs)', '', names(bh), fixed = TRUE) # a bit easier with gsub than with str_replace because of the parentheses around secs
+```
+
+Make all variable names lowercase
+```{r names_to_lower}
+names(bh) <- tolower(names(bh))
+```
+
+Rename date/time column to date_time
+```{r rename_date_time}
+bh <- bh %>% 
+  rename(
+    date_time = `date/time`
+  )
+```
+
+Now our column names are more manageable: <br />
+```{r new_names}
+names(bh)
+```
+
+
+
+
+**Manipulate variable names**  
+Make our categorical variables into factors
+```{r make_factor}
+# make vector of columns we want as factor
+want.as.factor <- c('tournamemnt', 'opponent', 'line', 'event_type', 'action', 
+                    'passer', 'receiver', 'defender',
+                    'player_0', 'player_1', 'player_2', 'player_3', 'player_4', 'player_5',
+                    'player_6', 'player_7')
+
+
+# make these columns factors
+bh[, want.as.factor] <- data.frame(apply(bh[, want.as.factor], 2, as.factor))
+```
+
+Make our numeric variables numeric
+```{r make_numeric}
+# make vector of columns we want as numeric
+want.as.numeric <- c('point_elapsed_seconds', 'our_score', 'their_score', 
+                     'hang_time', 'elapsed_time')
+
+# make these columns numeric
+bh[, want.as.numeric] <- data.frame(apply(bh[, want.as.numeric], 2, as.numeric))
+```
+
+Check that tournament is always the same and take it out
+```{r delete_tournament}
+# see if tournament is always NA
+# careful of the typo -- variable name is tournamenmt
+summary(bh$tournamemnt)
+
+# it is so take it out
+bh <- bh %>%
+  select(
+    -tournamemnt
+  )
+```
+
+Clean up the opponent column
+
+```{r opponent_levels}
+# check the levels in the opponent column
+levels(bh$opponent)
+```
+
+There are multiple columns for the same opponent
+
+```{r}
+# take vs in all its forms out of the opponents column
+levels(bh$opponent) <- levels(bh$opponent) %>%
+                                 str_replace_all(c('vs ', 'vs. ', 'Vs. '), '')
+
+# check that our levels of opponent look right
+levels(bh$opponent)
+
+# we have two types of alleycats: Alleycats and AlleyCats. make them into one
+bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
+
+# drop the unused level
+bh <- bh %>%
+  droplevels()
+
+# keep all columns in a bh_all tibble
+bh_all <- bh
+
+
+
+# ---------- make column for individual game number and game number against each opponent ----------------
+
+# split date_time into date and time columns
+# so that we can differentiate different games played against the same opponent
+# these will have the same oppoenent name an different dates
+bh_all <- separate(bh_all, date_time, into = c("date", "time"), sep=" ") 
+
+# get date in date format
+bh_all$date <- ymd(bh_all$date)
+
+# check that the class is date
+class(bh_all$date)
+
+# time column doesn't matter because it's the same for each date (gives us no 
+# more information than date), so we can ignore / get rid of it
+
+# add a column for ~~~~~~~~ game number against each opponent ~~~~~~~
+bh_all <- bh_all %>%
+  group_by(opponent) %>%
+  mutate(
+    game = as.numeric(factor(date))
+  )
+
+# make game a factor
+bh_all$game <- factor(bh_all$game)
+
+# check out
+summary(bh_all$game)
+
+
+# make a column for each ~~~~~~~ individual game ~~~~~~~ 
+# (there are 13 this season) using data.table
+library(data.table)
+bh_all <- setDT(bh_all)[, ind.gme := .GRP, by = .(date, opponent), ]
+
+# turn back into tibble
+bh_all <- as_tibble(bh_all)
+bh_all 
+
+# check that our last ind.gme value is 13
+tail(bh_all[, c(1, 3, 23:24)])
+
+
+
+
+
+# ---------- pare down to columns we really care about -------
+bh <- bh_all
+
+bh <- bh %>%
+  select (
+    opponent, our_score, their_score,
+    action, 
+    passer, receiver, defender, 
+    elapsed_time, game, ind.gme
+  )
+
+
+
+# ----------- gather player into one column ----------
+
+# gather passer, reciever, and defender into one column, actor
+# make corresponding name column to name each actor
+bh <- bh %>% 
+  tidyr::gather(
+    key = actor,
+    value = name,
+    passer:defender,
+    na.rm=T
+  ) %>%
+  print(n=20)
+
+tail(bh)
+
+
+# make actor and name factors
+bh$actor <- factor(bh$actor)
+bh$name <- factor(bh$name)
+
+
+# calculate plus minus per player
+plus_minus <- bh %>%
+  select(
+    name, action
+  ) %>%
+  group_by(
+    name
+  ) %>%
+  summarise(
+    goals = sum(action == 'Goal'),
+    Ds = sum(action == 'D'),
+    throwaways = sum(action == 'Throwaway'),
+    drops = sum(action == 'Drop'),
+    p_m = (goals + Ds) - (throwaways + drops)
+  ) %>%
+  arrange(desc(
+    p_m
+  ))
+plus_minus %>% print(n = 50)
+
+mvplus_minus <- plus_minus %>% 
+  filter(name != "Anonymous") 
+```
+
+A table with players' summary stats:
+
+```{r}
+mvplus_minus %>% print(n = 50)
+```
+
+***
+Plot
+=====
+<br />
+
+A plot approximating the Wildfire MVP by plotting season Ds vs. season goals.
+
+```{r mvplot}
+mvp_plot_2 <- ggplot(data = mvplus_minus, aes(x = Ds, y = goals, 
+                                   label = name, angle = 45))
+mvp_plot_2 + geom_point() +
+  ggtitle("MVP") +
+  xlab("Season Blocks") + 
+  ylab("Season Goals") +
+  geom_text_repel(aes(label = name), 
+                  box.padding = unit(0.45, "lines"))
+```
+
+
