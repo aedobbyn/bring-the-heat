@@ -4,6 +4,7 @@
 
 # ----- stats for Wildfire 2015 data ----------
 
+library(lme4)
 
 
 # get summary of the different opponent-date pairs (i.e., individual games)
@@ -133,8 +134,9 @@ plus_minus <- bh %>%
   ) %>%
   arrange(desc(
     p_m
-  )) %>%
-  print(n = 50)
+  ))
+plus_minus %>% print(n = 50)
+
 
 
 # plus minus per player per game      # doesn't work yet
@@ -252,9 +254,13 @@ lrtest(pt.diff.mod, pt.diff.no.opponent) # yes, opponent is a significant predic
 
 
 
+# random intercept for player and random slope for individual game
 
- 
+our_score.mixed <- lmer(our_score ~ opponent + (1 + ind.gme | name), data = bh)
+our_score.mixed
+our_score.mixed.no.opponent <- update(our_score.mixed, . ~ . - opponent)
 
+anova(our_score.mixed, our_score.mixed.no.opponent)
 
 
 

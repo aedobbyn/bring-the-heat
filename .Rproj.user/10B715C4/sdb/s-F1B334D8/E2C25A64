@@ -1,0 +1,18 @@
+{
+    "contents" : "# Wildfire 2015 data\n# from https://github.com/karinehsu/cs109-final-project\n\n\n# import packages\nlibrary(RPostgreSQL)\nlibrary(tibble)\nlibrary(dplyr)\nlibrary(stringr)\nlibrary(readr)\n\n# ---------------- to import from database ----------------\n\n# # set up driver as postgres\n# drv <- dbDriver(\"PostgreSQL\")\n# \n# # set connection to our db\n# con <- dbConnect(drv, dbname=\"pullplay_db\", host='localhost', port=5432, user=\"amanda\")\n# \n# # select all rows\n# bring_heat_2 <- dbGetQuery(con, \"SELECT * FROM bring_heat_2\") \n\n\n\n# ----------- to import from local spreadsheet -------------\n\n# import csv\nbring_heat_2 <- read_csv('./ChicagoWildfire2015-stats.csv')\n\n# make tibble\nbh <- as_tibble(bring_heat_2)\n\n# see head\nbh\n\n# check variable datatypes\nstr(bh)\n\n\n\n# ----------- change up variable names -----------\n\n# get rid of players 8 through 27 because they will never exist\nbh <- bh %>%\n  select(\n    -(`Player 8`:`Player 27`)\n  )\n\n# rename column headers to lowercase\nnames(bh) <- tolower(names(bh))\n\n# replace all spaces between\nnames(bh) <- str_replace_all(names(bh), \" \", \"_\")\nnames(bh)\n\n# take out the end of point stuff\nnames(bh) <- str_replace_all(names(bh), '_-_End_of_Point', '')\nnames(bh)\n\n# take out the seconds unit at the end of hang time and elapsed time\n# easier with gsub than with str_replace because of parentheses\nnames(bh) <- gsub('_(secs)', '', names(bh), fixed = TRUE)\nnames(bh)\n\n# little function to rename date/time column to date_time\nrename.date <- function (dat) {\n  names(dat)[names(dat)=='date/time'] = 'date_time'\n  return(names(dat))\n}\n# rename date column\nnames(bh)[bh$\"date/time\"] <- rename.date(bh)\n\n\n# check out our variable names\nnames(bh)\n\n\n# looks good\n\n\ntail(names(bh)[bh$\"date/time\"])\n\n\n# -------------------- manipulate variable types ------------------------ \n\n# check out what we have\nstr(bh)\n\n# set datatypes\nwant.as.factor <- c('opponent', 'line', 'event_type', 'act', 'passer', 'receiver', 'defender',\n                    'player_0', 'player_1', 'player_2', 'player_3', 'player_4', 'player_5',\n                    'player_6', 'player_7')\n\n\n# make these columns factors\nbh[, want.as.factor] <- data.frame(apply(bh[, want.as.factor], 2, as.factor))\n\n# set scores as numeric\nbh$our_score <- as.numeric(bh$our_score)\nbh$their_score <- as.numeric(bh$their_score)\n\n\n\n\n\n\n\n\n\n# who got the most Ds?\nDs_perPlayer <- bh %>%\n  group_by(defender) %>%\n  filter(act == 'D', !is.na(defender), defender != '') %>%\n  select(defender, act, our_score, their_score) %>%\n  #   mutate(\n  #     mean_our_score = mean(our_score)\n  #   ) %>%\n  summarise(\n    blocks = n() \n  ) %>%\n  arrange(desc(blocks)) %>%\n  print(n=nrow(Ds_perPlayer))\n",
+    "created" : 1472228550593.000,
+    "dirty" : true,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3914771687",
+    "id" : "E2C25A64",
+    "lastKnownWriteTime" : 1472234296,
+    "path" : "~/Desktop/post_exCog/bring_heat/bh_prep.R",
+    "project_path" : "bh_prep.R",
+    "properties" : {
+        "tempName" : "Untitled1"
+    },
+    "relative_order" : 1,
+    "source_on_save" : false,
+    "type" : "r_source"
+}

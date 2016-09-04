@@ -35,8 +35,7 @@ library(pacman)
 
 
 ```{r load_packages}
-p_load(RPostgreSQL,
-       tibble,
+p_load(tibble,
        lubridate,
        tidyr,
        dplyr,
@@ -153,11 +152,9 @@ bh[, want.as.numeric] <- data.frame(apply(bh[, want.as.numeric], 2, as.numeric))
 
 Check that tournament is always the same and take it out
 ```{r delete_tournament}
-# see if tournament is always NA
-# careful of the typo -- variable name is tournamenmt
-summary(bh$tournamemnt)
+summary(bh$tournamemnt) # careful of the typo -- variable name is tournamenmt
 
-# it is so take it out
+# it's always NA so take it out
 bh <- bh %>%
   select(
     -tournamemnt
@@ -165,14 +162,12 @@ bh <- bh %>%
 ```
 
 Clean up the opponent column
-
 ```{r opponent_levels}
 # check the levels in the opponent column
 levels(bh$opponent)
 ```
 
 There are multiple columns for the same opponent
-
 ```{r}
 # take vs in all its forms out of the opponents column
 levels(bh$opponent) <- levels(bh$opponent) %>%
@@ -190,11 +185,17 @@ bh <- bh %>%
 
 # keep all columns in a bh_all tibble
 bh_all <- bh
+```
 
+***
 
+## Tidy
 
-# ---------- make column for individual game number and game number against each opponent ----------------
+Get game numbers
+* Individual games (total of 13 this season)
+* Game number against each opponent
 
+```{r}
 # split date_time into date and time columns
 # so that we can differentiate different games played against the same opponent
 # these will have the same oppoenent name an different dates
@@ -208,8 +209,12 @@ class(bh_all$date)
 
 # time column doesn't matter because it's the same for each date (gives us no 
 # more information than date), so we can ignore / get rid of it
+```
 
-# add a column for ~~~~~~~~ game number against each opponent ~~~~~~~
+
+Make a column for each **game number against each opponent**
+
+```{r indiv_gme}
 bh_all <- bh_all %>%
   group_by(opponent) %>%
   mutate(
@@ -221,24 +226,26 @@ bh_all$game <- factor(bh_all$game)
 
 # check out
 summary(bh_all$game)
+```
 
+Make a column for each **individual game**
 
-# make a column for each ~~~~~~~ individual game ~~~~~~~ 
-# (there are 13 this season) using data.table
+```{r ind.gme}
 library(data.table)
 bh_all <- setDT(bh_all)[, ind.gme := .GRP, by = .(date, opponent), ]
+```
 
+```{r}
 # turn back into tibble
 bh_all <- as_tibble(bh_all)
 bh_all 
 
 # check that our last ind.gme value is 13
 tail(bh_all[, c(1, 3, 23:24)])
+```
 
 
-
-
-
+```{r pare_down}
 # ---------- pare down to columns we really care about -------
 bh <- bh_all
 
@@ -271,8 +278,10 @@ tail(bh)
 # make actor and name factors
 bh$actor <- factor(bh$actor)
 bh$name <- factor(bh$name)
+```
 
-
+## Get summary stats
+```{r plus_minus}
 # calculate plus minus per player
 plus_minus <- bh %>%
   select(
@@ -291,14 +300,14 @@ plus_minus <- bh %>%
   arrange(desc(
     p_m
   ))
-plus_minus %>% print(n = 50)
+```
 
+```{r take_out_anonymous}
 mvplus_minus <- plus_minus %>% 
   filter(name != "Anonymous") 
 ```
 
-A table with players' summary stats:
-
+Print the table with players' summary stats:
 ```{r}
 mvplus_minus %>% print(n = 50)
 ```
