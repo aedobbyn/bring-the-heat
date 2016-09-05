@@ -124,9 +124,9 @@ names(bh)
 ```
 
 
+<br /><br /><br />
 
-
-**Manipulate variable names**  
+**Manipulate variable types**  
 Make our categorical variables into factors
 ```{r make_factor}
 # make vector of columns we want as factor
@@ -161,33 +161,40 @@ bh <- bh %>%
   )
 ```
 
-Clean up the opponent column
+__Clean up the ```opponent``` column__
+
+Check the levels in the `opponent` column
 ```{r opponent_levels}
-# check the levels in the opponent column
 levels(bh$opponent)
 ```
 
 There are multiple columns for the same opponent
-```{r}
-# take vs in all its forms out of the opponents column
+
+Take "vs." in all its forms out of the `opponents` column
+```{r remove_vs}
 levels(bh$opponent) <- levels(bh$opponent) %>%
                                  str_replace_all(c('vs ', 'vs. ', 'Vs. '), '')
 ```
 
+
+Check that our levels of opponent look right
 ```{r checklevels_of_opponent}
-# check that our levels of opponent look right
 levels(bh$opponent)
 ```
 
+We have two types of Alleycats: `Alleycats` and `AlleyCats`. Combine these levels.
 ```{r alleycats_levels}
-# we have two types of alleycats: Alleycats and AlleyCats. make them into one
 bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
+```
 
-# drop the unused level
+And drop the unused level
+```{r drop_unused_level}
 bh <- bh %>%
   droplevels()
+```
 
-# keep all columns in a bh_all tibble
+Keep all columns in a `bh_all` tibble so we can safely pare down `bh`
+```{r }
 bh_all <- bh
 ```
 
@@ -195,26 +202,32 @@ bh_all <- bh
 
 ## Tidy
 
-Get game numbers
+Get game numbers:  
 * Individual games (total of 13 this season)
 * Game number against each opponent
 
-```{r}
-# split date_time into date and time columns
-# so that we can differentiate different games played against the same opponent
-# these will have the same oppoenent name an different dates
+<br />
+Split `date_time` into `date` and `time` columns so that we can differentiate different games played against the same opponent. 
+<br />
+(These will have the same `opponent` name an different `date`s.)
+```{r split_datetime}
 bh_all <- separate(bh_all, date_time, into = c("date", "time"), sep=" ") 
+```
 
-# get date in date format
+Get `date` in date format
+```{r}
 bh_all$date <- ymd(bh_all$date)
 
 # check that the class is date
 class(bh_all$date)
 
-# time column doesn't matter because it's the same for each date (gives us no 
-# more information than date), so we can ignore / get rid of it
-```
 
+```
+The `time` column is the same for each date (gives us no 
+more information than `date`), so we can safely ignore / get rid of it
+
+***
+#### Game numbers
 
 Make a column for each **game number against each opponent**
 
@@ -225,11 +238,7 @@ bh_all <- bh_all %>%
     game = as.numeric(factor(date))
   )
 
-# make game a factor
-bh_all$game <- factor(bh_all$game)
-
-# check out
-summary(bh_all$game)
+bh_all$game <- factor(bh_all$game) # make game a factor
 ```
 
 Make a column for each **individual game**
@@ -239,18 +248,20 @@ library(data.table)
 bh_all <- setDT(bh_all)[, ind.gme := .GRP, by = .(date, opponent), ]
 ```
 
-```{r}
-# turn back into tibble
+Turn `bh_all` back into tibble
+```{r back_to_tibble}
 bh_all <- as_tibble(bh_all)
-bh_all 
+```
 
-# check that our last ind.gme value is 13
+Check that our last `ind.gme` value is 13
+```{r}
 tail(bh_all[, c(1, 3, 23:24)])
 ```
 
+***
 
+Pare `bh` down to columns we really care about
 ```{r pare_down}
-# ---------- pare down to columns we really care about -------
 bh <- bh_all
 
 bh <- bh %>%
@@ -260,33 +271,40 @@ bh <- bh %>%
     passer, receiver, defender, 
     elapsed_time, game, ind.gme
   )
+```
 
+__Gather player into one column__  
 
-
-# ----------- gather player into one column ----------
-
-# gather passer, reciever, and defender into one column, actor
-# make corresponding name column to name each actor
+Combine `passer`, `reciever`, and `defender` into a new column, `actor`.  
+Make a `name` column corresponding to name each row in `actor`.
+```{r player_column}
 bh <- bh %>% 
   tidyr::gather(
     key = actor,
     value = name,
     passer:defender,
     na.rm=T
-  ) %>%
-  print(n=20)
+  )
 
-tail(bh)
+head(bh[, 4:9])
+```
 
-
-# make actor and name factors
+Make `actor` and `name` factors
+```{r name_to_factor}
 bh$actor <- factor(bh$actor)
 bh$name <- factor(bh$name)
 ```
 
+***
+
 ## Get summary stats
+
+Calculate plus minus per `name` (i.e., player) calculated as
+
+$$ plus minus = (goals + blocks) - (throwaways + drops) $$
+
+Arrange `name`s in descending order.
 ```{r plus_minus}
-# calculate plus minus per player
 plus_minus <- bh %>%
   select(
     name, action
@@ -306,12 +324,14 @@ plus_minus <- bh %>%
   ))
 ```
 
+Take out the player "Anonymous" [he is probably a scary hacker]
 ```{r take_out_anonymous}
 mvplus_minus <- plus_minus %>% 
   filter(name != "Anonymous") 
 ```
 
-Print the table with players' summary stats:
+Print the table with players' summary stats.  
+`p_m` is each player's plus minus.
 ```{r}
 mvplus_minus %>% print(n = 50)
 ```
@@ -333,5 +353,14 @@ mvp_plot_2 + geom_point() +
   geom_text_repel(aes(label = name), 
                   box.padding = unit(0.45, "lines"))
 ```
+
+<br />
+
+(Of course, this plot doesn't consider the bad things [drops and throwaways], 
+so the `p_m` column of the `mvplus_minus` tibble is probably a more accurate
+indicator of a player's contributions.)
+
+
+<br /><br /><br />
 
 
