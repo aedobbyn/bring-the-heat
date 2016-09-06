@@ -4,8 +4,7 @@ author:
   name: Amanda Dobbyn
   email: aedobbyn@uchicago.edu
 output: 
-  html_document:
-    keep_md: true
+  github_document
 ---
 
 ***
@@ -22,7 +21,7 @@ Outline
 * Analyze:
     + Calculate each player's plus-minus
 * Plot:
-    + Plot season blocks vs. season goals to determine Wildfire MVP
+    + Plot season blocks vs. season goals to "determine" Wildfire MVP
 
 ***
 
@@ -335,10 +334,10 @@ plus_minus <- bh %>%
   ) %>%
   summarise(
     goals = sum(action == 'Goal'),
-    Ds = sum(action == 'D'),
+    blocks = sum(action == 'D'),
     throwaways = sum(action == 'Throwaway'),
     drops = sum(action == 'Drop'),
-    p_m = (goals + Ds) - (throwaways + drops)
+    p_m = (goals + blocks) - (throwaways + drops)
   ) %>%
   arrange(desc(
     p_m
@@ -368,10 +367,10 @@ Plot
 =====
 <br />
 
-Approximate the Wildfire MVP by plotting season Ds vs. season goals.
+Approximate the Wildfire MVP by plotting season blocks vs. season goals.
 
 ```{r mvplot, fig.width=12, fig.height=8}
-mvp_plot_2 <- ggplot(data = mvplus_minus, aes(x = Ds, y = goals, 
+mvp_plot_2 <- ggplot(data = mvplus_minus, aes(x = blocks, y = goals, 
                                    label = name, angle = 45))
 mvp_plot_2 + geom_point() +
   ggtitle("Chicago Wildfire 2015 MVP") +
@@ -383,7 +382,7 @@ mvp_plot_2 + geom_point() +
 
 <br />
 
-Disclaimer: this plot doesn't consider the bad things [drops and throwaways], 
+Disclaimer: this plot doesn't consider the bad things (i.e., drops and throwaways), 
 so the `p_m` column of the `mvplus_minus` table is probably a more accurate
 indicator of a player's contributions.  
 It also does not correct for differences in playing time per game or number of games played.
