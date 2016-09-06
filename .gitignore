@@ -5,6 +5,8 @@ bh_explore.R
 # R extras #
 #####################
 *.Rproj
+*.Rproj.user
+.Rproj.user/10B715C4/sdb/prop/INDEX
 .Rhistory
 *.tex
 *.sty
@@ -16,4 +18,3 @@ wildfire_stats.csv
 # OS generated files #
 ######################
 .DS_Store
-.Rproj.user
