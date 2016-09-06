@@ -3,7 +3,9 @@ title: "Bring the Heat"
 author:
   name: Amanda Dobbyn
   email: aedobbyn@uchicago.edu
-output: html_document
+output: 
+  html_document:
+    keep_md: true
 ---
 
 ***
