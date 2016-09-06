@@ -24,9 +24,15 @@ Outline
 
 ***
 
+![](./jack_shey.jpg) 
+
+***
+
+<br /><br /><br />
+
 ## Munge
 
-__Import packages__  
+__Load packages__  
 using `pacman`
 
 ```{r import_pacman, echo=TRUE, warning=FALSE, message=FALSE}
@@ -35,15 +41,18 @@ library(pacman)
 
 
 ```{r load_packages}
-p_load(tibble,
-       lubridate,
-       tidyr,
-       dplyr,
-       stringr,
-       readr,
-       data.table,
-       ggplot2,
-       ggrepel)
+p_load(knitr,  # for weaving this into pretty format
+       readr,  # for read_csv()
+       tibble,  # for an easier way to work with data.frames
+       dplyr,  # for data manipulation
+       stringr,  # for string manipulation
+       lubridate,  # for dates
+       tidyr,  # for gather() and spread()
+       data.table,  # for 
+       DT,  # for kable()
+       ggplot2,  # for plots
+       ggrepel  # for spreading point labels
+       )
 ```
 
 ```{r set_wd, echo=FALSE}
@@ -76,11 +85,11 @@ bh
 **Manipulate variable names**  
 Check out column names
 ```{r get_names}
-as.vector(names(bh))
+names(bh)
 ```
 
-Get rid of players 8 through 27 because they will never exist  
-(There are only ever 7 players per team on the field at once)
+Get rid of players 8 through 27 because they will never exist.  
+(There are only ever 7 players per team on the field at once.)
 
 ```{r remove_phantom_players}
 bh <- bh %>%
@@ -160,6 +169,8 @@ bh <- bh %>%
   )
 ```
 
+<br /><br /><br />
+
 __Clean up the ```opponent``` column__
 
 Check the levels in the `opponent` column
@@ -170,7 +181,7 @@ levels(bh$opponent)
 There are multiple columns for the same opponent
 
 Take "vs." in all its forms out of the `opponents` column
-```{r remove_vs}
+```{r remove_vs, warning=FALSE}
 levels(bh$opponent) <- levels(bh$opponent) %>%
                                  str_replace_all(c('vs ', 'vs. ', 'Vs. '), '')
 ```
@@ -199,11 +210,14 @@ bh_all <- bh
 
 ***
 
-## Tidy
+<br /><br /><br />
 
-Get game numbers:  
-* Individual games (total of 13 this season)
-* Game number against each opponent
+Tidy
+=====
+
+* Get game numbers
+  + Individual games (total of 13 this season)
+  + Game number against each opponent
 
 <br />
 Split `date_time` into `date` and `time` columns so that we can differentiate different games played against the same opponent. 
@@ -216,16 +230,19 @@ bh_all <- separate(bh_all, date_time, into = c("date", "time"), sep=" ")
 Get `date` in date format
 ```{r}
 bh_all$date <- ymd(bh_all$date)
-
-# check that the class is date
-class(bh_all$date)
-
-
 ```
+
+Check that class is "Date"
+```{r check_date_class}
+class(bh_all$date)
+```
+
+
 The `time` column is the same for each date (gives us no 
 more information than `date`), so we can safely ignore / get rid of it
 
-***
+<br /><br />
+
 #### Game numbers
 
 Make a column for each **game number against each opponent**
@@ -257,7 +274,8 @@ Check that our last `ind.gme` value is 13
 tail(bh_all[, c(1, 3, 23:24)])
 ```
 
-***
+
+<br /><br />
 
 Pare `bh` down to columns we really care about
 ```{r pare_down}
@@ -276,7 +294,7 @@ __Gather player into one column__
 
 Combine `passer`, `reciever`, and `defender` into a new column, `actor`.  
 Make a `name` column corresponding to name each row in `actor`.
-```{r player_column}
+```{r player_column, warning=FALSE}
 bh <- bh %>% 
   tidyr::gather(
     key = actor,
@@ -296,13 +314,15 @@ bh$name <- factor(bh$name)
 
 ***
 
+<br /><br /><br />
+
 ## Get summary stats
 
-Calculate plus minus per `name` (i.e., player) calculated as
+Calculate plus minus per `name` (i.e., player) as
 
-$$ plus minus = (goals + blocks) - (throwaways + drops) $$
+$$ p\_m = (goals + blocks) - (throwaways + drops) $$
 
-Arrange `name`s in descending order.
+and arrange `name`s by `p_m` in descending order.
 ```{r plus_minus}
 plus_minus <- bh %>%
   select(
@@ -331,22 +351,28 @@ mvplus_minus <- plus_minus %>%
 
 Print the table with players' summary stats.  
 `p_m` is each player's plus minus.
-```{r}
-mvplus_minus %>% print(n = 50)
+
+<br /><br /><br />
+
+```{r mvplus_minus_kable, results = "asis"}
+kable(mvplus_minus, format = "markdown")
 ```
 
 ***
+
+<br /><br /><br />
+
 Plot
 =====
 <br />
 
-A plot approximating the Wildfire MVP by plotting season Ds vs. season goals.
+Approximate the Wildfire MVP by plotting season Ds vs. season goals.
 
 ```{r mvplot, fig.width=12, fig.height=8}
 mvp_plot_2 <- ggplot(data = mvplus_minus, aes(x = Ds, y = goals, 
                                    label = name, angle = 45))
 mvp_plot_2 + geom_point() +
-  ggtitle("MVP") +
+  ggtitle("Chicago Wildfire 2015 MVP") +
   xlab("Season Blocks") + 
   ylab("Season Goals") +
   geom_text_repel(aes(label = name), 
@@ -355,10 +381,10 @@ mvp_plot_2 + geom_point() +
 
 <br />
 
-Of course, this plot doesn't consider the bad things [drops and throwaways], 
-so the `p_m` column of the `mvplus_minus` tibble is probably a more accurate
+Disclaimer: this plot doesn't consider the bad things [drops and throwaways], 
+so the `p_m` column of the `mvplus_minus` table is probably a more accurate
 indicator of a player's contributions.  
-Also, it does not correct for differences in playing time.
+It also does not correct for differences in playing time per game or number of games played.
 
 
 <br /><br /><br />
