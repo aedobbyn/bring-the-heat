@@ -77,7 +77,7 @@ bh
 **Manipulate variable names**  
 Check out column names
 ```{r get_names}
-names(bh)
+as.vector(names(bh))
 ```
 
 Get rid of players 8 through 27 because they will never exist  
@@ -350,7 +350,7 @@ Plot
 
 A plot approximating the Wildfire MVP by plotting season Ds vs. season goals.
 
-```{r mvplot}
+```{r mvplot, fig.width=12, fig.height=8}
 mvp_plot_2 <- ggplot(data = mvplus_minus, aes(x = Ds, y = goals, 
                                    label = name, angle = 45))
 mvp_plot_2 + geom_point() +
@@ -363,11 +363,17 @@ mvp_plot_2 + geom_point() +
 
 <br />
 
-(Of course, this plot doesn't consider the bad things [drops and throwaways], 
+Of course, this plot doesn't consider the bad things [drops and throwaways], 
 so the `p_m` column of the `mvplus_minus` tibble is probably a more accurate
-indicator of a player's contributions.)
+indicator of a player's contributions.  
+Also, it does not correct for differences in playing time.
 
 
 <br /><br /><br />
+
+```{r}
+
+```
+
 
 
