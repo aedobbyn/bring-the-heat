@@ -2,10 +2,12 @@
 #####################
 bh_explore.R
 
-# Rproj information #
+# R extras #
 #####################
 *.Rproj
 .Rhistory
+*.tex
+*.sty
 
 # pre-cleaned data # 
 ####################
