@@ -48,7 +48,6 @@ p_load(tibble,
 
 ```{r set_wd, echo=FALSE}
 # ------- set wd ---------
-
 setwd("/Users/amanda/Desktop/post_exCog/bring_heat")
 ```
 
@@ -174,13 +173,6 @@ Take "vs." in all its forms out of the `opponents` column
 ```{r remove_vs}
 levels(bh$opponent) <- levels(bh$opponent) %>%
                                  str_replace_all(c('vs ', 'vs. ', 'Vs. '), '')
-
-# check that our levels of opponent look right
-levels(bh$opponent)
-
-# we have two types of alleycats: Alleycats and AlleyCats. make them into one
-bh$opponent[bh$opponent=='AlleyCats'] <- 'Alleycats'
- 
 ```
 
 
