@@ -17,7 +17,7 @@ Outline
 -   Analyze:
     -   Calculate each player's plus-minus
 -   Plot:
-    -   Plot season blocks vs. season goals to determine Wildfire MVP
+    -   Plot season blocks vs. season goals to "determine" Wildfire MVP
 
 ------------------------------------------------------------------------
 
