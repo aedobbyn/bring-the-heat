@@ -5,6 +5,7 @@ bh_explore.R
 # Rproj information #
 #####################
 *.Rproj
+.Rhistory
 
 # pre-cleaned data # 
 ####################
@@ -13,3 +14,4 @@ wildfire_stats.csv
 # OS generated files #
 ######################
 .DS_Store
+.Rproj.user
