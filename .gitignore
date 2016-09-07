@@ -4,9 +4,13 @@ bh_explore.R
 
 # R extras #
 #####################
-*.Rproj.user/10B715C4/sdb/
-.Rproj.user/10B715C4/sdb/prop/INDEX
+# *.Rproj.user/10B715C4/sdb/
+# .Rproj.user/10B715C4/sdb/prop/INDEX
+# .Rhistory
+.Rproj.user
 .Rhistory
+.RData
+.Ruserdata
 *.tex
 *.sty
 
