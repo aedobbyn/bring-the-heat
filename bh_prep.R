@@ -10,7 +10,8 @@ library(tidyr)
 library(dplyr)
 library(stringr)
 library(readr)
-library(data.table)
+library(data.table)  # looks like dplyr and data.table became dtplyr, so
+library(dtplyr)
 library(ggplot2)
 
 # ------- set wd ---------
