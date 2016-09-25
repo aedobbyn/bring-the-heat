@@ -4,12 +4,13 @@ bh_explore.R
 
 # R extras #
 #####################
-.Rproj.user
+*.Rproj.user
 .Rhistory
 .RData
 .Ruserdata
 *.tex
 *.sty
+*.Rproj
 
 # pre-cleaned data # 
 ####################
