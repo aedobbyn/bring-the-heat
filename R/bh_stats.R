@@ -1,5 +1,7 @@
 # bh_stats.R
 
+source("./R/bh_prep.R")
+
 # summary stats and models
 
 # ----- stats for Wildfire 2015 data ----------
@@ -219,6 +221,8 @@ bh_scale_time
 
 # ----------------------------------------- models ------------------------------------------
 
+library(broom) # for tidy() and glance()
+
 # get a running point diff column
 bh_pt.diff <- bh_all %>%
   mutate(
@@ -228,6 +232,13 @@ bh_pt.diff <- bh_all %>%
 # linear model with opponent, elapsed_time, and their interaction predicting difference in 
 # our_score and their_score
 pt.diff.mod.e_time <- lm(pt_diff ~ opponent * elapsed_time, data = bh_pt.diff)
+
+# take a look at tidy coefficients, p-vals etc.
+tidy(pt.diff.mod.e_time)
+
+# check out r-squared and other summary stats
+glance(pt.diff.mod.e_time)
+
 
 # take opponent out of the model
 pt.diff.e_time.no.opponent <- update(pt.diff.mod.e_time, . ~ . - opponent)
@@ -244,6 +255,16 @@ lrtest(pt.diff.mod.e_time, pt.diff.e_time.no.opponent) # yes, opponent is a sign
 # model with just opponent
 pt.diff.mod <- lm(pt_diff ~ opponent, data = bh_pt.diff)
 
+# what does broom show us
+tidy(pt.diff.mod)
+glance(pt.diff.mod)
+
+# same as
+pt.diff.alt <- bh %>% 
+  do(tidy(lm(our_score ~ opponent, data=.)))
+pt.diff.alt
+
+
 # take opponent out of the model
 pt.diff.no.opponent <- update(pt.diff.mod, . ~ . - opponent)
 
@@ -253,14 +274,22 @@ lrtest(pt.diff.mod, pt.diff.no.opponent) # yes, opponent is a significant predic
 
 
 
-
+### Mixed model ###
 # random intercept for player and random slope for individual game
+# fixed effect for opponent
 
 our_score.mixed <- lmer(our_score ~ opponent + (1 + ind.gme | name), data = bh)
 our_score.mixed
+
 our_score.mixed.no.opponent <- update(our_score.mixed, . ~ . - opponent)
 
+# get log likelihood to see whether opponent makes a sig difference in the model
+# same as lrtest() for a an lm()
 anova(our_score.mixed, our_score.mixed.no.opponent)
+
+
+# 
+
 
 
 

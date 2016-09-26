@@ -6,7 +6,6 @@ bh_explore.R
 #####################
 *.Rproj
 *.Rproj.user
-.Rproj.user/10B715C4/sdb/prop
 .Rhistory
 .RData
 .Ruserdata
@@ -20,3 +19,4 @@ wildfire_stats.csv
 # OS generated files #
 ######################
 .DS_Store
+.Rproj.user

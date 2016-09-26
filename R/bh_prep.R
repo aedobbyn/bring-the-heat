@@ -1,6 +1,4 @@
 # Wildfire 2015 data
-# from https://github.com/karinehsu/cs109-final-project
-
 
 # import packages
 library(RPostgreSQL)

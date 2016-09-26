@@ -1,5 +1,6 @@
 # bh_plot.R
 
+source("./R/bh_prep.R")
 
 # ----- plots for Wildfire 2015 data ----------
 
